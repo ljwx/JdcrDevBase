@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.util.Log
-import com.jdcr.jdcrlog.JdcrLog
 
 internal const val BASE_TAG = "jdcr_base"
 
@@ -20,7 +19,7 @@ object JdcrAppUtils {
             val appInfo = applicationContext.applicationInfo
             packageManager.getApplicationLabel(appInfo).toString()
         } catch (e: Exception) {
-            JdcrLog.w("获取AppName异常:", e)
+            Log.w(BASE_TAG, "获取AppName异常:", e)
             ""
         }
     }
@@ -29,7 +28,7 @@ object JdcrAppUtils {
         try {
             getPackageInfo()?.versionName ?: ""
         } catch (e: Exception) {
-            JdcrLog.w("获取VersionName异常:", e)
+            Log.w(BASE_TAG,"获取VersionName异常:", e)
             ""
         }
     }
@@ -66,7 +65,7 @@ object JdcrAppUtils {
         return try {
             applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
         } catch (e: Exception) {
-            JdcrLog.w("获取PackageInfo异常:", e)
+            Log.w(BASE_TAG,"获取PackageInfo异常:", e)
             null
         }
     }

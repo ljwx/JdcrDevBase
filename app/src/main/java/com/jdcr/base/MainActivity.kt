@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.jdcr.base.ui.theme.JdcrDevelopBaseTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.jdcr.jdcrbase.JdcrAppUtils
-import com.jdcr.jdcrlog.JdcrLog
 
 
 class MainActivity : ComponentActivity() {
@@ -21,8 +19,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        JdcrLog.enable(true)
-        JdcrLog.d(JdcrAppUtils.appName)
         setContent {
             JdcrDevelopBaseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

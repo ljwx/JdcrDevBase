@@ -37,8 +37,6 @@ dependencies {
     val coroutinesVersion = "1.6.4"
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-    // 日志
-    api("com.github.ljwx.jdcrlog:jdcrlog-android:1.3.1-SNAPSHOT")
     // 启动初始化
     val startupVersion = "1.0.0"
     api("androidx.startup:startup-runtime:$startupVersion")
