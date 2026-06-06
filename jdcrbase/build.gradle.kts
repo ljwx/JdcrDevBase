@@ -1,0 +1,60 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    `maven-publish`
+}
+
+android {
+    namespace = "com.jdcr.jdcrbase"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 24
+
+        testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    val kotlinVersion = "1.6.0"
+    api("androidx.core:core-ktx:$kotlinVersion")
+    // 2. 引入协程 (建议使用 1.6.4)
+    val coroutinesVersion = "1.6.4"
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    // 日志
+    api("com.github.ljwx.jdcrlog:jdcrlog-android:1.3.1-SNAPSHOT")
+    // 启动初始化
+    val startupVersion = "1.0.0"
+    api("androidx.startup:startup-runtime:$startupVersion")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"]) //release debug
+                // JitPack 会自动填充 groupId 和 version，
+                // 但为了本地测试，你可以保留这些：
+                groupId = "com.github.jdcr"
+                artifactId = "jdcrbase"
+                version = "1.0.0-SNAPSHOT"
+            }
+        }
+    }
+}
