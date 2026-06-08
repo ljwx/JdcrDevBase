@@ -12,9 +12,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.async as nativeAsync
+
+suspend inline fun <T> safeSuspendCancellableCoroutine(
+    crossinline onCancel: () -> Unit = {},
+    crossinline register: (once: (T) -> Unit) -> Unit
+): T = suspendCancellableCoroutine { cont ->
+    val once = AtomicBoolean(false)
+    cont.invokeOnCancellation { onCancel() }
+    register { value ->
+        if (once.compareAndSet(false, true) && cont.isActive) {
+            cont.resume(value, null)
+        }
+    }
+}
 
 class JdcrSafeCoroutineScope(
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
