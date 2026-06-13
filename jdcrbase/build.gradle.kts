@@ -31,15 +31,12 @@ android {
 }
 
 dependencies {
-    val kotlinVersion = "1.6.0"
-    api("androidx.core:core-ktx:$kotlinVersion")
-    // 2. 引入协程 (建议使用 1.6.4)
-    val coroutinesVersion = "1.6.4"
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    api(jdcr.androidx.core.ktx)
+    // 协程
+    api(jdcr.kotlinx.coroutines.core)
+    api(jdcr.kotlinx.coroutines.android)
     // 启动初始化
-    val startupVersion = "1.0.0"
-    api("androidx.startup:startup-runtime:$startupVersion")
+    api(jdcr.androidx.startup)
 }
 
 afterEvaluate {

@@ -21,6 +21,11 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { setUrl("https://jitpack.io") }
     }
+    versionCatalogs {
+        create("jdcr") {
+            from("com.github.ljwx:JdcrDependencies:1.0.2")
+        }
+    }
 }
 
 rootProject.name = "JdcrDevelopBase"
