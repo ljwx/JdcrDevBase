@@ -1,14 +1,15 @@
 package com.jdcr.jdcrbase.log
 
 data class JdcrLogData(
-    val tag: String?,
+    val logTag: String,
     val message: String,
-    val level: Int,
+    val level: Long,
     val timestamp: Long,
-    val throwable: Throwable?,
+    val throwable: Throwable? = null,
     val tagSplit: Triple<String?, String?, String?>?,
     val versionCode: Long,
-    val versionName: String
+    val versionName: String,
+    val extraData: String? = null
 )
 
 interface IDevBaseLog {
