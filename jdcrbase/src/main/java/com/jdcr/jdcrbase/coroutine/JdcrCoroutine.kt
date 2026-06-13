@@ -1,6 +1,7 @@
-package com.jdcr.jdcrbase
+package com.jdcr.jdcrbase.coroutine
 
 import android.util.Log
+import com.jdcr.jdcrbase.app.BASE_TAG
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler

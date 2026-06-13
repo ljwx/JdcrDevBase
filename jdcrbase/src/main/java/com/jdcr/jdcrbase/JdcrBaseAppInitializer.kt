@@ -3,6 +3,8 @@ package com.jdcr.jdcrbase
 import android.content.Context
 import android.util.Log
 import androidx.startup.Initializer
+import com.jdcr.jdcrbase.app.BASE_TAG
+import com.jdcr.jdcrbase.app.JdcrAppUtils
 
 class JdcrBaseAppInitializer : Initializer<Unit> {
 

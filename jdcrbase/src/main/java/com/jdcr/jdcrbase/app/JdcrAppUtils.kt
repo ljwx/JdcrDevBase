@@ -1,6 +1,7 @@
-package com.jdcr.jdcrbase
+package com.jdcr.jdcrbase.app
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.util.Log
@@ -11,7 +12,7 @@ object JdcrAppUtils {
 
     private lateinit var applicationContext: Context
 
-    val isAppDebug by lazy { (applicationContext.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
+    val isAppDebug by lazy { (applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
 
     val appName by lazy {
         try {

@@ -4,16 +4,16 @@ import com.jdcr.jdcrbase.log.JdcrLogData
 
 interface IDevBaseDatabaseLog {
 
-    fun write(log: JdcrLogData)
+    suspend fun write(log: JdcrLogData): Result<Unit>
 
-    fun write(logs: List<JdcrLogData>)
+    suspend fun write(logs: List<JdcrLogData>): Result<Unit>
 
-    fun read(startTs: Long, endTs: Long): List<JdcrLogData>
+    suspend fun read(startTs: Long, endTs: Long): Result<List<JdcrLogData>>
 
-    fun readTag(tag: String, startTs: Long, endTs: Long): List<JdcrLogData>
+    suspend fun readTag(tag: String, startTs: Long, endTs: Long): Result<List<JdcrLogData>>
 
-    fun readFeature(feat: String, startTs: Long, endTs: Long): List<JdcrLogData>
+    suspend fun readFeature(feat: String, startTs: Long, endTs: Long): Result<List<JdcrLogData>>
 
-    fun removeOlder(latestTs: Long)
+    suspend fun removeOlder(latestTs: Long): Result<Unit>
 
 }

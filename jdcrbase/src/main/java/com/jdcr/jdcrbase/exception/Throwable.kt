@@ -1,4 +1,4 @@
-package com.jdcr.jdcrbase.app
+package com.jdcr.jdcrbase.exception
 
 import android.util.Log
 

@@ -1,4 +1,4 @@
-package com.jdcr.jdcrbase
+package com.jdcr.jdcrbase.page
 
 import android.app.Activity
 import android.content.Context
