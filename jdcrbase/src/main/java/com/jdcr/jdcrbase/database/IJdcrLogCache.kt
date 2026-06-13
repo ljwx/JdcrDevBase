@@ -2,7 +2,7 @@ package com.jdcr.jdcrbase.database
 
 import com.jdcr.jdcrbase.log.JdcrLogData
 
-interface IDevBaseDatabaseLog {
+interface IJdcrLogCache {
 
     suspend fun write(log: JdcrLogData): Result<Unit>
 

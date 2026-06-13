@@ -12,7 +12,7 @@ data class JdcrLogData(
     val extraData: String? = null
 )
 
-interface IDevBaseLog {
+interface IJdcrLogBase {
 
     fun enable(debugMode: Boolean)
 
