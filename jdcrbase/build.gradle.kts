@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    alias(jdcr.plugins.android.library)
+    alias(jdcr.plugins.kotlin.android)
     `maven-publish`
 }
 
@@ -37,6 +37,8 @@ dependencies {
     api(jdcr.kotlinx.coroutines.android)
     // 启动初始化
     api(jdcr.androidx.startup)
+    // datastore
+    api(jdcr.androidx.datastore)
 }
 
 afterEvaluate {
