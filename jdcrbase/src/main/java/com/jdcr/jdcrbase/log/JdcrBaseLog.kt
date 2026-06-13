@@ -12,6 +12,9 @@ data class JdcrLogData(
 )
 
 interface IDevBaseLog {
+
+    fun enable(debugMode: Boolean)
+
     fun v(msg: String?)
 
     fun vF(feature: String, msg: String?)
