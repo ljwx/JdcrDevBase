@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.jdcr.jdcrbase.page.JdcrActivityUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,10 +66,11 @@ object JdcrAppUtils {
     private val _isForeground = MutableStateFlow(false)
     val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
 
-    internal fun setApplicationContext(context: Context) {
+    internal fun onApplicationCreate(application: Application) {
         Log.i(BASE_TAG, "设置ApplicationContext")
-        applicationContext = context.applicationContext
+        applicationContext = application.applicationContext
         initAppLifecycle()
+        JdcrActivityUtils.init(application)
     }
 
     fun getAppContext(): Context = applicationContext

@@ -1,5 +1,6 @@
 package com.jdcr.jdcrbase
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.startup.Initializer
@@ -10,7 +11,8 @@ class JdcrBaseAppInitializer : Initializer<Unit> {
 
     override fun create(context: Context) {
         Log.i(BASE_TAG, "启动初始化")
-        JdcrAppUtils.setApplicationContext(context)
+        val app = context.applicationContext as Application
+        JdcrAppUtils.onApplicationCreate(app)
     }
 
     override fun dependencies(): List<Class<out Initializer<*>?>?> {
