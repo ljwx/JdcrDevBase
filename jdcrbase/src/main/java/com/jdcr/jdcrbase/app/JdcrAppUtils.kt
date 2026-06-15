@@ -1,10 +1,17 @@
 package com.jdcr.jdcrbase.app
 
+import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.util.Log
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal const val BASE_TAG = "jdcr_base"
 
@@ -29,7 +36,7 @@ object JdcrAppUtils {
         try {
             getPackageInfo()?.versionName ?: ""
         } catch (e: Exception) {
-            Log.w(BASE_TAG,"获取VersionName异常:", e)
+            Log.w(BASE_TAG, "获取VersionName异常:", e)
             ""
         }
     }
@@ -55,9 +62,13 @@ object JdcrAppUtils {
 
     val packageName: String by lazy { applicationContext.packageName }
 
+    private val _isForeground = MutableStateFlow(false)
+    val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
+
     internal fun setApplicationContext(context: Context) {
         Log.i(BASE_TAG, "设置ApplicationContext")
         applicationContext = context.applicationContext
+        initAppLifecycle()
     }
 
     fun getAppContext(): Context = applicationContext
@@ -66,9 +77,23 @@ object JdcrAppUtils {
         return try {
             applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
         } catch (e: Exception) {
-            Log.w(BASE_TAG,"获取PackageInfo异常:", e)
+            Log.w(BASE_TAG, "获取PackageInfo异常:", e)
             null
         }
+    }
+
+    private fun initAppLifecycle() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                Log.i(BASE_TAG, "app进入前台")
+                _isForeground.value = true
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                Log.i(BASE_TAG, "app进入后台")
+                _isForeground.value = false
+            }
+        })
     }
 
 }

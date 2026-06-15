@@ -31,6 +31,8 @@ android {
 }
 
 dependencies {
+    api(jdcr.androidx.appcompat)
+    api(jdcr.androidx.lifecycle)
     api(jdcr.androidx.core.ktx)
     // 协程
     api(jdcr.kotlinx.coroutines.core)
@@ -39,6 +41,7 @@ dependencies {
     api(jdcr.androidx.startup)
     // datastore
     api(jdcr.androidx.datastore)
+    api(jdcr.androidx.lifecycle.process)
 }
 
 afterEvaluate {
