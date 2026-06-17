@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("jdcr") {
-            from("com.github.ljwx:JdcrDependencies:1.1.12")
+            from("com.github.ljwx:JdcrDependencies:4.0.0")
         }
     }
 }

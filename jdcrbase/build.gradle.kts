@@ -24,6 +24,7 @@ android {
             )
         }
     }
+    buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -42,6 +43,10 @@ dependencies {
     // datastore
     api(jdcr.androidx.datastore)
     api(jdcr.androidx.lifecycle.process)
+    // compose
+    api(platform(jdcr.androidx.compose.bom))
+    api(jdcr.androidx.compose.ui)
+    api(jdcr.androidx.compose.material3)
 }
 
 afterEvaluate {
