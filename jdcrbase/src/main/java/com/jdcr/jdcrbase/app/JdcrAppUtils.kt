@@ -2,19 +2,18 @@ package com.jdcr.jdcrbase.app
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 import com.jdcr.jdcrbase.page.JdcrActivityUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-internal const val BASE_TAG = "jdcr_base"
 
 object JdcrAppUtils {
 
@@ -28,7 +27,7 @@ object JdcrAppUtils {
             val appInfo = applicationContext.applicationInfo
             packageManager.getApplicationLabel(appInfo).toString()
         } catch (e: Exception) {
-            Log.w(BASE_TAG, "获取AppName异常:", e)
+            JdcrDevBaseLog.w("获取AppName异常:", e)
             ""
         }
     }
@@ -37,7 +36,7 @@ object JdcrAppUtils {
         try {
             getPackageInfo()?.versionName ?: ""
         } catch (e: Exception) {
-            Log.w(BASE_TAG, "获取VersionName异常:", e)
+            JdcrDevBaseLog.w("获取VersionName异常:", e)
             ""
         }
     }
@@ -67,10 +66,11 @@ object JdcrAppUtils {
     val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
 
     internal fun onApplicationCreate(application: Application) {
-        Log.i(BASE_TAG, "设置ApplicationContext")
+        JdcrDevBaseLog.i("设置ApplicationContext")
         applicationContext = application.applicationContext
         initAppLifecycle()
         JdcrActivityUtils.init(application)
+        setupCrashHandler()
     }
 
     fun getAppContext(): Context = applicationContext
@@ -79,7 +79,7 @@ object JdcrAppUtils {
         return try {
             applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
         } catch (e: Exception) {
-            Log.w(BASE_TAG, "获取PackageInfo异常:", e)
+            JdcrDevBaseLog.w("获取PackageInfo异常:", e)
             null
         }
     }
@@ -87,15 +87,25 @@ object JdcrAppUtils {
     private fun initAppLifecycle() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
-                Log.i(BASE_TAG, "app进入前台")
+                JdcrDevBaseLog.i("app进入前台")
                 _isForeground.value = true
             }
 
             override fun onStop(owner: LifecycleOwner) {
-                Log.i(BASE_TAG, "app进入后台")
+                JdcrDevBaseLog.i("app进入后台")
                 _isForeground.value = false
             }
         })
+    }
+
+    fun restartApp() {
+        val intent =
+            applicationContext.packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            } ?: return
+        JdcrDevBaseLog.w("马上重启App")
+        applicationContext.startActivity(intent)
+        Runtime.getRuntime().exit(0)  // 或 Process.killProcess(Process.myPid())
     }
 
 }
