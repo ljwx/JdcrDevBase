@@ -1,5 +1,6 @@
 package com.jdcr.jdcrbase.app
 
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -66,7 +67,8 @@ object JdcrAppUtils {
     val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
 
     internal fun onApplicationCreate(application: Application) {
-        JdcrDevBaseLog.i("设置ApplicationContext")
+        if (!isMainProcess(application)) return
+        JdcrDevBaseLog.i("主进程基础功能初始化")
         applicationContext = application.applicationContext
         initAppLifecycle()
         JdcrActivityUtils.init(application)
@@ -74,6 +76,20 @@ object JdcrAppUtils {
     }
 
     fun getAppContext(): Context = applicationContext
+
+    fun isMainProcess(context: Context): Boolean {
+        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            val pid = android.os.Process.myPid()
+            val am =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            am.runningAppProcesses
+                ?.firstOrNull { it.pid == pid }
+                ?.processName
+        }
+        return processName == context.packageName
+    }
 
     private fun getPackageInfo(): PackageInfo? {
         return try {

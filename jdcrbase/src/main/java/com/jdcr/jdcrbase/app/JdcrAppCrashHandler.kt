@@ -8,14 +8,19 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.system.exitProcess
 
+@Volatile
+private var register = false
+
 internal fun setupCrashHandler() {
+    if (register) return
+    register = true
     val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-    val deviceInfo = JdcrDeviceInfo()
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         try {
+            val deviceInfo = JdcrDeviceInfo()
             val crashInfo = buildString {
                 appendLine("App版本: ${JdcrAppUtils.versionName}/${JdcrAppUtils.versionCode}")
-                appendLine("进/线程: ${Process.myPid()}${thread.name}")
+                appendLine("进/线程: ${Process.myPid()}/${thread.name}")
                 appendLine(deviceInfo.toString())
                 appendLine(truncate(throwable.stackTraceToString(), 8191))
             }

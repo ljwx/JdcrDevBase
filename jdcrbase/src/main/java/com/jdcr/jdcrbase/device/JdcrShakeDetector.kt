@@ -6,13 +6,13 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.SystemClock
+import com.jdcr.jdcrbase.app.JdcrAppUtils
 import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 import kotlin.math.sqrt
 
 class JdcrShakeDetector(
-    context: Context,
     private val config: Config = Config(),
-    private val onShake: () -> Unit
+    private val onShakeNotMain: () -> Unit
 ) : SensorEventListener {
     data class Config(
         // 高通滤波系数，越接近 1 越平滑；0.8~0.95 常用
@@ -29,7 +29,7 @@ class JdcrShakeDetector(
     )
 
     private val sensorManager =
-        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        JdcrAppUtils.getAppContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? =
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
@@ -103,7 +103,7 @@ class JdcrShakeDetector(
                 lastTriggerTime = now
                 peakTimes.clear()
                 JdcrDevBaseLog.i("触发摇一摇阈值")
-                onShake()
+                onShakeNotMain()
             }
         } else {
             // 非峰值时也持续清理过期记录，防止队列堆积

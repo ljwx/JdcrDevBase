@@ -13,12 +13,13 @@ import android.os.storage.StorageManager
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jdcr.jdcrbase.app.JdcrAppUtils
 import com.jdcr.jdcrbase.datastore.JdcrDataStore
 import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 import com.jdcr.jdcrbase.number.to2Decimal
 import java.util.UUID
-import kotlin.math.roundToInt
 
 data class JdcrDeviceInfo(
     val Manufacturer: String = Build.MANUFACTURER,
@@ -36,33 +37,6 @@ data class JdcrDeviceInfo(
 
         val androidId by lazy {
             Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        }
-
-        suspend fun getAppUniqueIdCache(): String {
-            var uniqueId = JdcrDataStore.getString("unique_id_cache")
-            if (uniqueId == null) {
-                uniqueId = UUID.randomUUID().toString()
-                JdcrDataStore.putString("unique_id_cache", uniqueId)
-            }
-            return uniqueId
-        }
-
-        @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // API 34
-        suspend fun getAppSetIdNative() {
-            val manager = AppSetIdManager.get(context)
-            val executor =
-                ContextCompat.getMainExecutor(context) // 或者使用 ContextCompat.getMainExecutor(context)
-            manager.getAppSetId(executor, object : OutcomeReceiver<AppSetId, Exception> {
-                override fun onResult(result: AppSetId) {
-                    val id = result.id
-                    val scope = result.scope
-                    JdcrDevBaseLog.d("AppSetId: $id, Scope: $scope")
-                }
-
-                override fun onError(error: Exception) {
-                    error.printStackTrace()
-                }
-            })
         }
 
     }
@@ -115,9 +89,45 @@ object JdcrDeviceUtils {
     }
 
     fun getSystemName(): String? {
-        val romName = JdcrCustomSystemInfo.getCustomRomName() ?: return null
-        val romVersion = JdcrCustomSystemInfo.getCustomRomVersion()
+        val romName = JdcrSystemInfoUtils.getRomNameTry() ?: return null
+        val romVersion = JdcrSystemInfoUtils.getRomVersionTry()
         return "$romName $romVersion"
+    }
+
+    suspend fun getAppUUIdCache(): String {
+        var result = ""
+        JdcrDataStore.getDataStore().edit { prefs ->
+            val key = stringPreferencesKey("unique_id_cache")
+            val old = prefs[key]
+            if (old != null) {
+                result = old
+            } else {
+                val newId = UUID.randomUUID().toString()
+                prefs[key] = newId
+                result = newId
+            }
+        }
+        return result
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE) // API 34
+    fun getAppSetId(callback: (Result<String>) -> Unit) {
+        val manager = AppSetIdManager.get(context)
+        val executor =
+            ContextCompat.getMainExecutor(context) // 或者使用 ContextCompat.getMainExecutor(context)
+        manager.getAppSetId(executor, object : OutcomeReceiver<AppSetId, Exception> {
+            override fun onResult(result: AppSetId) {
+                val id = result.id
+                val scope = result.scope
+                JdcrDevBaseLog.d("AppSetId: $id, Scope: $scope")
+                callback(Result.success(id))
+            }
+
+            override fun onError(error: Exception) {
+                JdcrDevBaseLog.w("获取AppSetId错误", error)
+                callback(Result.failure(error))
+            }
+        })
     }
 
 

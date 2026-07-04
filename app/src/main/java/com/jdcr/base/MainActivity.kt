@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         Log.d("jdcr_", JdcrDeviceUtils.getSystemName() ?: "")
         JdcrDeviceUtils.getRAMInfo()
         JdcrDeviceUtils.getStorageInfo()
-        JdcrShakeDetector(context) {
+        JdcrShakeDetector {
 
         }.start()
 

@@ -31,9 +31,9 @@ object JdcrDataStore {
         )
     }
 
-    fun initStoreName(name: String) {
-        storeName = name
-    }
+//    fun initStoreNameFirst(name: String) {
+//        storeName = name
+//    }
 
     private fun isInvalidKey(key: String): Boolean {
         if (key.isBlank()) {
@@ -308,6 +308,11 @@ object JdcrDataStore {
         warnSyncCall("getSync")
         return runSync(default) { get(key, default) }
     }
+
+    suspend fun getDataStore(): DataStore<Preferences> {
+        return dataStore()
+    }
+
 }
 
 private suspend fun kotlinx.coroutines.flow.Flow<Preferences>.firstOrNullSafe(): Preferences? {

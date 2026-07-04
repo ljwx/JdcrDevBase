@@ -57,6 +57,7 @@ class JdcrClipboardHelper private constructor(context: Context) {
         if (primary.itemCount <= 0) return@runCatching null
         primary.getItemAt(0).coerceToText(appContext)
     }.getOrNull()
+
     /**
      * 是否包含可读文本内容。
      */
@@ -73,7 +74,7 @@ class JdcrClipboardHelper private constructor(context: Context) {
      * API 28+ 用 clearPrimaryClip；低版本使用空文本覆盖。
      */
     @AnyThread
-    fun clear(): Boolean = runCatching {
+    fun clearClipboard(): Boolean = runCatching {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             clipboard.clearPrimaryClip()
         } else {
@@ -81,6 +82,7 @@ class JdcrClipboardHelper private constructor(context: Context) {
         }
         true
     }.getOrDefault(false)
+
     /**
      * 监听剪切板变化。返回 Closeable，用完务必 close() 释放。
      */

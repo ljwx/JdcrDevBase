@@ -2,9 +2,9 @@ package com.jdcr.jdcrbase.device
 
 import android.os.Build
 
-object JdcrCustomSystemInfo {
+object JdcrSystemInfoUtils {
 
-    fun getCustomRomName(): String? {
+    fun getRomNameTry(): String? {
         return when {
             !getSystemProperty("ro.mi.os.version.name").isNullOrBlank() -> "HyperOS"
             !getSystemProperty("ro.miui.ui.version.name").isNullOrBlank() -> "MIUI"
@@ -19,7 +19,7 @@ object JdcrCustomSystemInfo {
         }
     }
 
-    fun getCustomRomVersion(): String? {
+    fun getRomVersionTry(): String? {
         return when {
             !getSystemProperty("ro.mi.os.version.name").isNullOrBlank() ->
                 getSystemProperty("ro.mi.os.version.name")
