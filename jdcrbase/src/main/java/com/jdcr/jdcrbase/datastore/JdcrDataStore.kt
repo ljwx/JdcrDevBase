@@ -1,6 +1,5 @@
 package com.jdcr.jdcrbase.datastore
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -12,6 +11,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.jdcr.jdcrbase.app.JdcrAppUtils
+import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -20,8 +20,6 @@ import kotlinx.coroutines.withTimeout
 
 private const val SUSPEND_TIMEOUT_MS = 5_000L
 private const val SYNC_TIMEOUT_MS = 1_500L
-private const val DATASTORE_TAG = "jdcr_datastore"
-
 
 object JdcrDataStore {
 
@@ -39,7 +37,7 @@ object JdcrDataStore {
 
     private fun isInvalidKey(key: String): Boolean {
         if (key.isBlank()) {
-            Log.w(DATASTORE_TAG, "DataStore key 不能为空")
+            JdcrDevBaseLog.wDS("key不能为空")
             return true
         }
         return false
@@ -61,7 +59,7 @@ object JdcrDataStore {
             }
         }.getOrElse {
             val suffix = key?.let { ", key=$it" } ?: ""
-            Log.e(DATASTORE_TAG, "$apiName 失败$suffix", it)
+            JdcrDevBaseLog.eDS("$apiName 失败$suffix", it)
             default
         }
     }
@@ -195,7 +193,7 @@ object JdcrDataStore {
             is Float -> putFloat(key, value)
             is Double -> putDouble(key, value)
             else -> {
-                Log.w(DATASTORE_TAG, "put 暂不支持类型: ${value::class.java.simpleName}")
+                JdcrDevBaseLog.wDS("put暂不支持类型: ${value::class.java.simpleName}")
                 false
             }
         }
@@ -211,7 +209,7 @@ object JdcrDataStore {
             is Float -> getFloat(key, default) as T
             is Double -> getDouble(key, default) as T
             else -> {
-                Log.w(DATASTORE_TAG, "get 暂不支持类型: ${default::class.java.simpleName}")
+                JdcrDevBaseLog.wDS("get暂不支持类型: ${default::class.java.simpleName}")
                 default
             }
         }
@@ -231,7 +229,7 @@ object JdcrDataStore {
                 }
             }
         }.getOrElse {
-            Log.e(DATASTORE_TAG, "同步 DataStore 调用失败", it)
+            JdcrDevBaseLog.eDS("同步调用失败", it)
             default
         }
     }

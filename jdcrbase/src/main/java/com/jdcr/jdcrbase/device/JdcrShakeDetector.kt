@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.SystemClock
+import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 import kotlin.math.sqrt
 
 class JdcrShakeDetector(
@@ -26,30 +27,39 @@ class JdcrShakeDetector(
         // 传感器延迟档位
         val sensorDelay: Int = SensorManager.SENSOR_DELAY_GAME
     )
+
     private val sensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor? =
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
     // 用于高通滤波：估计重力分量（低频）
     private var gravityX = 0f
     private var gravityY = 0f
     private var gravityZ = 0f
+
     // 峰值统计
     private val peakTimes = ArrayDeque<Long>()
+
     // 冷却控制
     private var lastTriggerTime = 0L
+
     // 峰值去抖：避免同一次抖动在极短时间内重复记数
     private var lastPeakTime = 0L
     private val minPeakIntervalMs = 80L
     fun start(): Boolean {
         val sensor = accelerometer ?: return false
+        JdcrDevBaseLog.i("注册摇一摇监听")
         sensorManager.registerListener(this, sensor, config.sensorDelay)
         return true
     }
+
     fun stop() {
+        JdcrDevBaseLog.i("注销摇一摇监听")
         sensorManager.unregisterListener(this)
         resetInternalState()
     }
+
     private fun resetInternalState() {
         gravityX = 0f
         gravityY = 0f
@@ -57,6 +67,7 @@ class JdcrShakeDetector(
         peakTimes.clear()
         lastPeakTime = 0L
     }
+
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
         val now = SystemClock.elapsedRealtime()
@@ -91,6 +102,7 @@ class JdcrShakeDetector(
                 // 3) 冷却时间：触发后记录触发时刻
                 lastTriggerTime = now
                 peakTimes.clear()
+                JdcrDevBaseLog.i("触发摇一摇阈值")
                 onShake()
             }
         } else {
@@ -100,5 +112,6 @@ class JdcrShakeDetector(
             }
         }
     }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 }

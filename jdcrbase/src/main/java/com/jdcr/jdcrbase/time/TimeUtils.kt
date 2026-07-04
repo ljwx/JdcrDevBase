@@ -56,6 +56,18 @@ object TimeUtils {
         }
     }
 
+    fun format(timestampMillis: Long, pattern: String): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            DateTimeFormatter.ofPattern(pattern, Locale.getDefault()).format(
+                Instant.ofEpochMilli(
+                    timestampMillis
+                ).atZone(zoneId)
+            )
+        } else {
+            SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timestampMillis))
+        }
+    }
+
     /** 字符串 -> 时间戳(ms)，失败返回 null */
     fun parse(text: String, enableMs: Boolean = false): Long? {
         return runCatching {
