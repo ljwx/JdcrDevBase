@@ -17,23 +17,25 @@ internal fun setupCrashHandler() {
     val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         try {
-            val deviceInfo = JdcrDeviceInfo()
+            val appMessage =
+                "App版本: ${JdcrAppUtils.versionName}/${JdcrAppUtils.versionCode}。进/线程: ${JdcrAppUtils.getProcessName()}/${thread.name}"
+            val deviceMessage = JdcrDeviceInfo().toString()
             val crashInfo = buildString {
-                appendLine("App版本: ${JdcrAppUtils.versionName}/${JdcrAppUtils.versionCode}")
-                appendLine("进/线程: ${Process.myPid()}/${thread.name}")
-                appendLine(deviceInfo.toString())
+                appendLine(appMessage)
+                appendLine(deviceMessage)
                 appendLine(truncate(throwable.stackTraceToString(), 8191))
             }
             saveCrashToFile(crashInfo)
-            JdcrDevBaseLog.e("App发生了崩溃", throwable)
+            JdcrDevBaseLog.e("App发生了崩溃,$appMessage \n$deviceMessage", throwable)
         } catch (e: Throwable) {
             e.printStackTrace()
         } finally {
-            // 交给系统默认处理，否则可能“吞掉”崩溃
             if (defaultHandler == null) {
+                JdcrDevBaseLog.w("杀掉App")
                 Process.killProcess(Process.myPid())
                 exitProcess(10)
             } else {
+                JdcrDevBaseLog.w("交给其他处理者")
                 defaultHandler.uncaughtException(thread, throwable)
             }
         }

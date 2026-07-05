@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.Build
+import android.os.Process
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -67,9 +68,9 @@ object JdcrAppUtils {
     val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
 
     internal fun onApplicationCreate(application: Application) {
-        if (!isMainProcess(application)) return
-        JdcrDevBaseLog.i("主进程基础功能初始化")
         applicationContext = application.applicationContext
+        if (!isMainProcess()) return
+        JdcrDevBaseLog.i("主进程基础功能初始化")
         initAppLifecycle()
         JdcrActivityUtils.init(application)
         setupCrashHandler()
@@ -77,18 +78,21 @@ object JdcrAppUtils {
 
     fun getAppContext(): Context = applicationContext
 
-    fun isMainProcess(context: Context): Boolean {
-        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    fun isMainProcess(): Boolean {
+        return getProcessName() == applicationContext.packageName
+    }
+
+    fun getProcessName(): String? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             Application.getProcessName()
         } else {
-            val pid = android.os.Process.myPid()
+            val pid = Process.myPid()
             val am =
-                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                applicationContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             am.runningAppProcesses
                 ?.firstOrNull { it.pid == pid }
                 ?.processName
         }
-        return processName == context.packageName
     }
 
     private fun getPackageInfo(): PackageInfo? {
