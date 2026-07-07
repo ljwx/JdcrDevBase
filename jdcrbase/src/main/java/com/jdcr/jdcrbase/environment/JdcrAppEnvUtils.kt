@@ -20,6 +20,7 @@ interface EnvHostData {
     val third: String
     val fourth: String
     val fifth: String
+    val sixth: String
     val extension: EnvHostDataExt?
 }
 

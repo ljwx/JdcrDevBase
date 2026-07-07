@@ -31,6 +31,7 @@ data class TestEnvHost(
     override val third: String = "",
     override val fourth: String = "",
     override val fifth: String = "",
+    override val sixth: String = "",
     override val extension: EnvHostDataExt? = null
 ) : EnvHostData
 
