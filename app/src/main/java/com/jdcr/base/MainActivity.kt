@@ -18,6 +18,7 @@ import com.jdcr.jdcrbase.device.JdcrDeviceInfo
 import com.jdcr.jdcrbase.device.JdcrDeviceUtils
 import com.jdcr.jdcrbase.device.JdcrShakeDetector
 import com.jdcr.jdcrbase.environment.EnvHostData
+import com.jdcr.jdcrbase.environment.EnvHostDataExt
 import com.jdcr.jdcrbase.environment.JdcrAppEnv
 import com.jdcr.jdcrbase.environment.JdcrAppEnvUtils
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ data class TestEnvHost(
     override val third: String = "",
     override val fourth: String = "",
     override val fifth: String = "",
+    override val extension: EnvHostDataExt? = null
 ) : EnvHostData
 
 val devEnv = JdcrAppEnv.Internal.Dev(TestEnvHost(), TestEnvHost())

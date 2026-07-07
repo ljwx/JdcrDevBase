@@ -20,7 +20,17 @@ interface EnvHostData {
     val third: String
     val fourth: String
     val fifth: String
+    val extension: EnvHostDataExt?
 }
+
+data class EnvHostDataExt(
+    val first: String,
+    val second: String,
+    val third: String,
+    val fourth: String,
+    val fifth: String,
+    val sixth: String,
+)
 
 sealed class JdcrAppEnv(
     open val type: Type,
