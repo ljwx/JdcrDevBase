@@ -19,19 +19,20 @@ interface EnvHostData {
     val second: String
     val third: String
     val fourth: String
+        get() = ""
     val fifth: String
+        get() = ""
     val sixth: String
-    val extension: EnvHostDataExt?
+        get() = ""
+    val seventh: String
+        get() = ""
+    val eighth: String
+        get() = ""
+    val ninth: String
+        get() = ""
+    val tenth: String
+        get() = ""
 }
-
-data class EnvHostDataExt(
-    val first: String,
-    val second: String,
-    val third: String,
-    val fourth: String,
-    val fifth: String,
-    val sixth: String,
-)
 
 sealed class JdcrAppEnv(
     open val type: Type,
@@ -66,7 +67,7 @@ sealed class JdcrAppEnv(
         data class Test(
             override val host: EnvHostData,
             override val webHost: EnvHostData,
-            val extHost: EnvHostData? = null,
+            var extension: String? = null,
         ) :
             Internal(Type.Test, host, webHost)
 
