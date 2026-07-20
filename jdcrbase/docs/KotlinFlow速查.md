@@ -12,7 +12,9 @@ flow.collect { value ->
 }
 ```
 
-注意：普通 `Flow` 默认是冷流，不 `collect` 就不会执行。
+注意：普通 `Flow` 默认是冷流，不 `collect` 就不会执行；每次重新 `collect`，上游通常都会重新执行。
+
+`StateFlow`、`SharedFlow` 和 `Channel.receiveAsFlow()` 属于热流：数据生产不依赖某一个 collector 是否存在。
 
 ---
 
@@ -181,6 +183,8 @@ suspend fun showToast(message: String) {
 适合 Toast、跳转、弹窗、全局事件
 ```
 
+注意：默认的 `MutableSharedFlow()` 使用 `replay = 0`，没有订阅者时不会保存事件，新订阅者也收不到旧事件。需要可靠消费的一次性事件时，应根据场景考虑 `Channel`、状态建模或设置合适的 `replay`。
+
 ---
 
 ## 9. 常用操作符
@@ -200,6 +204,31 @@ flow.map { it.toString() }
 ```kotlin
 flow.filter { it > 0 }
 ```
+
+### take / takeWhile
+
+只收指定数量的数据，或者满足条件时继续收集。
+
+```kotlin
+flow.take(3)
+
+events
+    .takeWhile { it !is Finished }
+    .collect { handleEvent(it) }
+```
+
+注意：`takeWhile` 不会把第一个不满足条件的值交给下游，所以上面的 `Finished` 不会进入 `collect`。
+
+如果结束事件也需要处理，可以先处理，再判断是否结束：
+
+```kotlin
+events
+    .onEach { handleEvent(it) }
+    .takeWhile { it !is Finished }
+    .collect()
+```
+
+适合只取前几个值、等待某个状态，以及在 SSE / WebSocket 收到业务结束事件后主动结束收集。
 
 ### onEach
 
@@ -234,6 +263,40 @@ textFlow
 
 适合搜索框。
 
+### timeout
+
+限制上游两次发出数据之间的最大等待时间，适合检测 SSE / WebSocket 长时间没有业务数据。
+
+```kotlin
+@OptIn(FlowPreview::class)
+events
+    .timeout(10.seconds)
+    .catch { cause ->
+        if (cause is TimeoutCancellationException) {
+            handleTimeout()
+        } else {
+            throw cause
+        }
+    }
+    .collect { event ->
+        handleEvent(event)
+    }
+```
+
+注意：
+
+```text
+开始 collect 到第一条数据也会计算超时
+每收到一次上游 emit，计时重新开始
+下游 collect 处理数据的时间不计算在内
+它限制的是相邻数据的等待时间，不是整个任务的总时长；总时长用 withTimeout
+SSE / WebSocket 通常要等完整业务事件 emit，底层收到零散字节不一定会刷新它
+业务结束不等于 Flow 自动结束；上游未结束时，之后仍可能触发 timeout
+catch 要区分超时和其他异常，不要把所有异常都包装成超时
+```
+
+`timeout` 在部分协程版本中属于 `FlowPreview`。当前工程使用的 `kotlinx-coroutines 1.6.4` 没有该操作符，升级到提供该 API 的版本后才能使用。
+
 ### collectLatest
 
 只处理最新值，旧任务没完成会被取消。
@@ -266,6 +329,46 @@ combine(userFlow, networkFlow) { user, network ->
 }
 ```
 
+### buffer / conflate
+
+默认情况下，上游和下游顺序执行；collector 处理慢时，上游也会等待。
+
+```kotlin
+flow
+    .buffer()
+    .collect { slowHandle(it) }
+```
+
+`buffer` 允许上下游并发运行，但消费者持续跟不上时需要注意积压和内存占用。
+
+```kotlin
+sensorFlow
+    .conflate()
+    .collect { render(it) }
+```
+
+`conflate` 只保留最新值，可能丢掉中间值。它适合 UI 状态，不适合音频块、文本增量、SSE / WebSocket 消息等不能丢失的数据。`StateFlow` 本身就只表示最新状态，通常不需要再调用 `conflate()`。
+
+### stateIn / shareIn
+
+把冷流转换成热流，避免多个 collector 重复执行上游。
+
+```kotlin
+val state = source.stateIn(
+    scope,
+    SharingStarted.WhileSubscribed(5_000),
+    initialValue
+)
+
+val shared = source.shareIn(
+    scope,
+    SharingStarted.WhileSubscribed(5_000),
+    replay = 0
+)
+```
+
+`stateIn` 适合共享当前状态，必须有初始值；`shareIn` 适合共享事件，可以用 `replay` 控制新订阅者能收到多少个旧值。
+
 ### catch
 
 捕获上游异常。
@@ -280,11 +383,17 @@ flow
 
 ### onCompletion
 
-Flow 结束时回调，适合资源清理。
+Flow 结束时回调，适合资源清理。正常完成、异常和取消都会执行。
 
 ```kotlin
-flow.onCompletion {
+flow.onCompletion { cause ->
     closeResource()
+
+    if (cause == null) {
+        // 正常完成
+    } else {
+        // 异常或取消
+    }
 }
 ```
 
@@ -327,6 +436,10 @@ flow {
 | 一次性事件 / 广播 | `SharedFlow` |
 | 普通 Flow 转状态 | `stateIn` |
 | 普通 Flow 转共享流 | `shareIn` |
+| 一段时间没有新数据就失败 | `timeout` |
+| 收到业务结束条件后停止 | `takeWhile` |
+| 上下游并发、缓冲数据 | `buffer` |
+| 只关心最新状态 | `conflate` |
 
 ---
 
@@ -340,6 +453,10 @@ Channel 负责中转消息
 receiveAsFlow 暴露给业务 collect
 onCompletion 负责取消 readJob
 ```
+
+这类 Connection 通常只应该有一个业务 collector。`receiveAsFlow()` 的多个 collector 会竞争 Channel 中的数据；其中一个 collector 完成后如果通过 `onCompletion` 取消 `readJob`，还会影响其他 collector。
+
+业务结束事件和网络连接结束是两回事。收到 `Finished` 后如果不结束收集或关闭上游，空闲超时仍会继续计时。
 
 简化代码：
 
@@ -388,6 +505,11 @@ return Connection(
 事件/广播：SharedFlow
 防重复：distinctUntilChanged
 防抖：debounce
+空闲超时：timeout
+满足条件后停止：take / takeWhile
 只处理最新：collectLatest / flatMapLatest
+上下游缓冲：buffer
+只保留最新状态：conflate
+冷流转热流：stateIn / shareIn
 收尾清理：onCompletion / awaitClose
 ```
