@@ -17,7 +17,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 共享 debug 签名：避免换电脑因默认 debug.keystore 不同而必须卸载重装
+    signingConfigs {
+        create("jdcrDebug") {
+            storeFile = file("jdcr_test.keystore")
+            storePassword = "jdcr123456"
+            keyAlias = "jdcr"
+            keyPassword = "jdcr123456"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("jdcrDebug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
