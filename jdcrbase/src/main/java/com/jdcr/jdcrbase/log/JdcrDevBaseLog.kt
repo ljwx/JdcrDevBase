@@ -7,6 +7,7 @@ internal object JdcrDevBaseLog {
     internal const val BASE_TAG = "jdcr_base"
     internal const val DS = BASE_TAG + "_ds"
     internal const val Env = BASE_TAG + "_env"
+    internal const val Keyboard = BASE_TAG + "_keyboard"
 
     fun v(message: String) {
         Log.v(BASE_TAG, message)
@@ -38,6 +39,10 @@ internal object JdcrDevBaseLog {
 
     fun iEnv(message: String) {
         Log.i(Env, message)
+    }
+
+    fun iKeyboard(message: String) {
+        Log.i(Keyboard, message)
     }
 
 }

@@ -9,7 +9,7 @@ import com.jdcr.jdcrbase.log.JdcrDevBaseLog
 class JdcrBaseAppInitializer : Initializer<Unit> {
 
     override fun create(context: Context) {
-        JdcrDevBaseLog.i("App启动器启动")
+        JdcrDevBaseLog.i("JdcrSdk启动器启动")
         val app = context.applicationContext as Application
         JdcrAppUtils.onApplicationCreate(app)
     }

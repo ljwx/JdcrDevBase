@@ -71,7 +71,7 @@ object JdcrAppUtils {
         applicationContext = application.applicationContext
         if (!isMainProcess()) return
         JdcrDevBaseLog.i("主进程基础功能初始化")
-        initAppLifecycle()
+        addAppForegroundObserver()
         JdcrActivityUtils.init(application)
         setupCrashHandler()
     }
@@ -104,7 +104,10 @@ object JdcrAppUtils {
         }
     }
 
-    private fun initAppLifecycle() {
+    /**
+     * 延迟大约 700ms，用来滤掉切页和旋转
+     */
+    private fun addAppForegroundObserver() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onStart(owner: LifecycleOwner) {
                 JdcrDevBaseLog.i("app进入前台")
